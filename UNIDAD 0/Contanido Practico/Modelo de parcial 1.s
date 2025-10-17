@@ -1,25 +1,39 @@
-.text 
-    li a0,100
-    li a1,50 
-    # Jump and link : Salta a una dirección (una etiqueta o función).  y Guarda la dirección de retorno (la instrucción siguiente)
-    jal x1,MIN
+# MODELO DE EXAMEN - Ejercicio 1
+# Complete el siguiente programa en ASM de RISC-V. El programa debe imprimir por la
+# terminal el contenido de las posiciones de memoria pares cuyo contenido sea un nÃºmero
+# par. Salida esperada: 0x02
+
+.data
+    vector: .word  0,8,10,11,3,32,2
+    finvector:
+.text
+    li a7,1
+    la x4,vector
+    la x5,finvector 
+    addi x5,x5,4
+    li x6,0
+    addi x4,x4,-8
+    jal while
+    li a7,10 
+    ecall 
     nop
-fin: 
-    # bucle infinito 
-    beq x0,x0,fin
     
-MIN:
-    # Branch if Less Than (“salta si es menor que”)
-    # blt rs1, rs2, etiqueta
-    # if (rs1 < rs2) goto etiqueta;
-    blt a0,a1,volver
-    addi a0,a1,0
+while:
+    addi x4,x4,8
+    beq x4,x5,ret
+    lw a0,0(x4)
+    verSiEsPar: 
+        addi a0,a0,-2
+        beq a0,x6,MostrarNum
+        blt a0,x6,while
+        j verSiEsPar
+    j while 
     
-volver:
-    # Jump and link to register: Guarda la dirección de retorno (la siguiente instrucción) en un registro (rd). Salta a una dirección contenida en otro registro (rs1), más un offset
-    # jalr rd, offset(rs1)
-    # rd: registro donde se guarda la dirección de retorno (típicamente ra o x1)
-    # rs1: contiene la dirección base a la que se quiere saltar
-    # offset: desplazamiento (inmediato) sumado a rs1 (típicamente 0)
-    jalr x0,x1,0
-      
+ret:
+    ret
+    
+MostrarNum:
+    lw a0,0(x4)
+    ecall
+    j while
+    
